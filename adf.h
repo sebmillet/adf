@@ -47,6 +47,7 @@ class Adf {
     public:
 
         Adf();
+        void init();
 
         void rf_send_instruction(const uint32_t code,
                                  byte repeat = RF_DEFAULT_REPEAT);

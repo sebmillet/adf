@@ -73,12 +73,19 @@ Adf::Adf():has_initialized(false) {
                        (unsigned long)RF_DELAYFACTOR;
     rf_table[RF_LONG] = (unsigned long)RF_FACTOR_LONG *
                         (unsigned long)RF_DELAYFACTOR;
+    init();
+}
+
+void Adf::init() {
+    pinMode(RF_TRANSMIT_PIN, OUTPUT);
+      // Put RF transmitter at rest
+    digitalWrite(RF_TRANSMIT_PIN, LOW);
 }
 
 void Adf::rf_send_instruction(const uint32_t code, byte repeat) {
 
     if (!has_initialized) {
-        pinMode(RF_TRANSMIT_PIN, OUTPUT);
+        init();
         has_initialized = true;
     }
 
@@ -92,14 +99,7 @@ void Adf::rf_send_instruction(const uint32_t code, byte repeat) {
     rf_send_signal(0, RF_TICK);
     rf_send_signal(1, RF_TICK);
 
-// **WARNING**
-//   The last signal sent is a '1' bit.
-//   This ensures the transmitter is at rest when sending terminates.
-//   Were the last bit a 0, that'd turn the PIN into HIGH and this'd activate
-//   the transmitter.
-//   Obviously, rf_send_instruction must leave the transmitter at rest when
-//   leaving.
-
+    init();
 }
 
 void Adf::rf_send_code(const uint32_t code) {
@@ -119,11 +119,10 @@ void Adf::rf_send_code(const uint32_t code) {
     }
 
     rf_send_signal(1, RF_SEP);
-    rf_send_signal(0, RF_ZERO);
+    rf_send_signal(0, RF_ZERO); // WARNING WARNING WARNING
 
 // **WARNING**
-//   See comment in rf_send_instruction: here, the last bit sent is a '0',
-//   meaning, **THE TRANSMITTER IS LEFT ACTIVE**.
+//   The last bit sent is 0 => **TRANSMITTER IS LEFT ACTIVE**
 
 }
 
